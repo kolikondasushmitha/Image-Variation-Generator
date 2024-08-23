@@ -45,7 +45,7 @@ class ImageVariationApp:
         self.export_btn.pack(pady=10)
 
         self.variations = []
-        self.variations_df = pd.DataFrame(columns=["Saturation", "Contrast", "Brightness"])
+        self.variations_data = []  # Use a list to accumulate data rows
         self.current_image = None
 
         self.root.bind("<Configure>", self.on_resize)
@@ -55,7 +55,7 @@ class ImageVariationApp:
         self.canvas.delete("all")
         self.progress['value'] = 0
         self.progress.update()
-        self.variations_df = pd.DataFrame(columns=["Saturation", "Contrast", "Brightness"])
+        self.variations_data = []  # Reset the data list
 
         # Simulate upload progress
         for i in range(100):
@@ -93,11 +93,11 @@ class ImageVariationApp:
                     img_color = enhancer_color.enhance(color)
 
                     self.variations.append((img_color, saturation, contrast, color))
-                    self.variations_df = self.variations_df.append({
+                    self.variations_data.append({
                         "Saturation": saturation,
                         "Contrast": contrast,
                         "Brightness": color
-                    }, ignore_index=True)
+                    })
 
     def display_images(self):
         self.canvas.delete("all")
@@ -137,13 +137,17 @@ class ImageVariationApp:
                 messagebox.showinfo("Saved", "Image saved successfully!")
 
     def export_data(self):
-        if not self.variations_df.empty:
+        if self.variations_data:
             save_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
             if save_path:
-                self.variations_df.to_csv(save_path, index=False)
+                # Create a DataFrame from the accumulated data
+                df = pd.DataFrame(self.variations_data)
+                df.to_csv(save_path, index=False)
                 messagebox.showinfo("Exported", "Variation data exported successfully!")
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = ImageVariationApp(root)
     root.mainloop()
+
+
