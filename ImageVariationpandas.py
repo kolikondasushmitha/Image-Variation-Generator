@@ -51,7 +51,7 @@ class ImageVariationApp:
         self.root.bind("<Configure>", self.on_resize)
 
     def upload_image(self):
-        # Reset canvas, progress bar, and DataFrame
+        # Reset canvas, progress bar, and data list
         self.canvas.delete("all")
         self.progress['value'] = 0
         self.progress.update()
@@ -73,6 +73,8 @@ class ImageVariationApp:
                 self.export_btn.config(state=tk.NORMAL)
             except UnidentifiedImageError:
                 messagebox.showerror("Error", "The selected file is not a valid image. Please select an image file.")
+            except Exception as e:
+                messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
     def generate_variations(self):
         self.variations = []
@@ -140,14 +142,18 @@ class ImageVariationApp:
         if self.variations_data:
             save_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
             if save_path:
-                # Create a DataFrame from the accumulated data
-                df = pd.DataFrame(self.variations_data)
-                df.to_csv(save_path, index=False)
-                messagebox.showinfo("Exported", "Variation data exported successfully!")
+                try:
+                    # Create a DataFrame from the accumulated data
+                    df = pd.DataFrame(self.variations_data)
+                    df.to_csv(save_path, index=False)
+                    messagebox.showinfo("Exported", "Variation data exported successfully!")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Failed to export data: {e}")
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = ImageVariationApp(root)
     root.mainloop()
+
 
 
